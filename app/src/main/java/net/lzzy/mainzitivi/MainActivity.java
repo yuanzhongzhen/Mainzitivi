@@ -3,6 +3,7 @@ package net.lzzy.mainzitivi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -47,8 +48,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (v.getId()==R.id.btn_async){
             if (isCounting){
-                Toast.makeText(MainActivity.this,"jishizhong.."
+                Toast.makeText(MainActivity.this,"计时中 .."
                 ,Toast.LENGTH_SHORT).show();
+                return;
             }
             asyncCountDown();
         }
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                   Message msg=hanler.obtainMessage();
                   msg.what = WHAT_COUNTING;
                   msg.arg1=seconds;
-                  hanler.handleMessage(msg);
+                  hanler.sendMessage(msg);
 
                 } catch (InterruptedException e) {
                     hanler.sendMessage(hanler.obtainMessage(WHAT_EXCEPTION,e.getMessage()));
@@ -100,17 +102,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }).start();
 
     }
-
     private ConutHanler hanler=new ConutHanler(this);
-    private static class ConutHanler extends Handler{
-        WeakReference<MainActivity>tageActivity;
+
+    private static class ConutHanler extends AbstractStatiChandler <MainActivity>{
         /**构造器**/
-        ConutHanler(MainActivity activity){
-            tageActivity=new WeakReference<>(activity);
+        ConutHanler(MainActivity context){
+            super(context);
+
         }
         @Override
-        public void handleMessage(Message msg) {
-            MainActivity activity=tageActivity.get();
+        public void handleMessage(Message msg,MainActivity activity) {
             switch (msg.what){
                 case WHAT_COUNTING:
                     String text="计时剩余"+msg.arg1+"秒";
@@ -131,9 +132,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+
+
+
+
     }
 
-             /**同步**/
+
+
+
+    /**同步**/
                 private void conutDown() {
                while (seconds>=0){
                    String text="计时剩余"+seconds+"秒";
